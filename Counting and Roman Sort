@@ -1,0 +1,123 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+using namespace std;
+
+
+bool readingNUmbers(vector<int>& vectorA, const char* fn) {
+    ifstream input(fn);
+    int number;
+
+    if (!input.is_open()) {
+        return false;
+    }
+
+    while (!input.eof()) {
+        input >> number;
+        if (!input) break;
+        vectorA.push_back(number);
+    }
+
+    input.close();
+
+    return true;
+}
+
+bool printNumbers(vector<int>& vectorA, const char* fn) {
+    ofstream output(fn);
+
+    if (!output.is_open()) {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < vectorA.size(); i++)
+        output << vectorA[i] << ' ';
+
+    output.close();
+
+    return true;
+}
+
+void countingSort(vector<int>& A,vector<int>& B,vector<unsigned int>& C, int min)
+{
+    for (int i = 0; i < A.size(); i++)
+    {
+        A[i] -= min;
+    }
+    for (int i = 0; i < C.size(); i++)
+    {
+        C[i] = 0;
+    }
+    for (int i = 0; i < A.size(); i++)
+    {
+        C[A[i]] += 1;
+    }
+    for (int i = 1; i < C.size(); i++) 
+    {
+        C[i] = C[i] + C[i - 1];
+    }
+    for (int i = A.size() - 1; i >= 0; i--)
+    {
+        B[C[A[i]] - 1] = A[i];
+        C[A[i]] -= 1;
+    }
+    for (int i = 0; i < A.size(); i++)
+    {
+        B[i] += min;
+    }
+}
+
+void romanSort(vector<int>& A,vector<int>& B,vector<unsigned int>& C, int min)
+{
+    int count = 0;
+    int temp = min;
+    for (int i = 0; i < A.size(); i++)
+    {
+        A[i] -= min;
+    }
+
+    for (int i = 0; i < C.size(); i++)
+    {
+        C[i] = 0;
+    }
+
+    for (int i = 0; i < A.size(); i++)
+    {
+        C[A[i]] += 1;
+    }
+    for (int i = 0; i < C.size(); i++)
+    {
+        if (C[i] != 0)
+        {
+            for (int j = 0; j < C[i]; j++)
+            {
+                B[count] = temp;
+                count++;
+            }
+        }
+        temp+=1;
+    }
+}
+
+int main(int argc, const char** argv) {
+    // ( argv[0]= name file, argv[1]= choose sorting,argv[2]= output)
+    if (argc != 3) return 0;
+    vector<int> A;
+    if (!readingNUmbers(A, argv[2])) return 1;
+    vector<int> B(A.size());
+    int max = *max_element(A.begin(), A.end());
+    int min = *min_element(A.begin(), A.end());
+    vector<unsigned int> C((max - min) + 1);
+
+    if (argv[1][0] == '0') {
+        countingSort(A, B, C, min);
+    }
+
+    else if (argv[1][0] == '1') {
+        romanSort(A, B, C, min);
+    }
+
+    if (!printNumbers(B, "out.txt")) return 1;
+    return 0;
+}
